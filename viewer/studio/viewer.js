@@ -430,7 +430,8 @@ export function createStudioViewer({ stage, logoUrl, onClipChange, fixSession = 
   }
 
   let currentUrl = null;
-  function load(url, { label = '', autoplay = false, keepCamera = false } = {}) {
+  // `animation` picks one move by name from a file holding several (the all-moves GLB); else the first
+  function load(url, { label = '', autoplay = false, keepCamera = false, animation = null } = {}) {
     setToolsMode(true);
     const token = ++loadToken;
     const camera = keepCamera && view ? { position: view.camera.position.clone(), target: view.controls.target.clone() } : null;
@@ -464,7 +465,7 @@ export function createStudioViewer({ stage, logoUrl, onClipChange, fixSession = 
             onFrame: (time, duration) => { requestRender(); syncScrub(time, duration); },
             onStateChange: (playing) => syncPlayButton(playing),
           });
-          player.select(loaded.rig.animations[0]);
+          player.select(loaded.rig.animations.find((clip) => clip.name === animation) || loaded.rig.animations[0]);
           player.action.setLoop(THREE.LoopRepeat, Infinity);
           if (autoplay) player.play();
         }
@@ -537,7 +538,8 @@ export function createStudioViewer({ stage, logoUrl, onClipChange, fixSession = 
     }
   }
 
-  /** Show a row of moves (or, with `still`, of props). `items` are {name, url}. */
+  /** Show a row of moves (or, with `still`, of props). `items` are {name, url}, plus `animation`
+   *  when several moves share one file. */
   // which way the next rigged character's feet point; null leaves models as they come
   let facing = null;
   function setFacing(forward) { facing = forward || null; }
@@ -555,7 +557,7 @@ export function createStudioViewer({ stage, logoUrl, onClipChange, fixSession = 
       + (still ? '' : `<span class="scrubber"><input type="range" class="scrub" data-scrub min="0" max="1000" value="0" aria-label="Scrub through the move"><span class="meta frame" data-frame>frame 0</span></span>`);
     if (clipIndex >= 0) onClipChange?.(items[clipIndex]);
     clipBar.dataset.rest = restUrl || '';
-    if (clipIndex >= 0) load(items[clipIndex].url, { label: items[clipIndex].name, autoplay: true });
+    if (clipIndex >= 0) load(items[clipIndex].url, { label: items[clipIndex].name, autoplay: true, animation: items[clipIndex].animation });
     else if (restUrl) load(restUrl, { label: 'rest pose' });
   }
 
@@ -582,7 +584,7 @@ export function createStudioViewer({ stage, logoUrl, onClipChange, fixSession = 
     if (chip) {
       clipIndex = Number(chip.dataset.clip);
       clipBar.querySelectorAll('[data-clip]').forEach((b) => b.setAttribute('aria-pressed', String(b === chip)));
-      load(clips[clipIndex].url, { label: clips[clipIndex].name, autoplay: true });
+      load(clips[clipIndex].url, { label: clips[clipIndex].name, autoplay: true, animation: clips[clipIndex].animation });
       onClipChange?.(clips[clipIndex]);
       return;
     }

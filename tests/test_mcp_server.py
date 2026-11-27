@@ -176,7 +176,7 @@ def test_the_server_registers_every_tool():
     names = {t.name for t in asyncio.run(server.list_tools())}
     assert names == {"status", "list_engines", "list_moves", "create", "continue_asset", "run_status", "cancel_run",
                      "list_assets", "list_versions", "options", "preview", "open_in_studio", "install_backend", "blender_helpers",
-                     "model_info", "show_in_folder", "export_roblox", "report_bug", "make_skin", "skin_status", "skin_picture",
+                     "model_info", "show_in_folder", "export_roblox", "export_all_moves", "report_bug", "make_skin", "skin_status", "skin_picture",
                      "approve_skin_picture", "redo_skin_picture", "build_skin", "cancel_skin", "export_skins",
                      "usage_counts", "brush_back", "picture_status", "back_versions",
                      "list_addons", "install_addon", "run_addon"}

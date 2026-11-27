@@ -1,7 +1,7 @@
 // AssetFurnace studio: Library | one viewer | Steps.
 // Steps run here through the server's job APIs, prop-sheet splitting included.
 
-import { STEPS, stepCount, stepDone, stepState, statusText, displayModel, stepFile, canViewStep, canFixShown, fixBlockedNote, servedUrl, visibleFamilies, madeVersion, engineOf, engineChoices, openingView, isModelFile, duration, canViewPictures, sizeText, deletionWords, linkedAssetId, statsRows, canReveal, robloxLines } from './library.js';
+import { STEPS, stepCount, stepDone, stepState, statusText, displayModel, stepFile, canViewStep, canFixShown, fixBlockedNote, servedUrl, visibleFamilies, madeVersion, engineOf, engineChoices, openingView, isModelFile, duration, canViewPictures, sizeText, deletionWords, linkedAssetId, statsRows, canReveal, robloxLines, bundleSummary, bundleClips } from './library.js';
 import { createStudioViewer } from './viewer.js';
 import { readyEngines, readableLog, copyDetails, logScroll, moveBox, resizeBox } from './jobs.js';
 import { stepBody, wireStep, wireBrush, wireVersions } from './steps.js';
@@ -364,6 +364,40 @@ $('robloxBtn').addEventListener('click', async (event) => {
   }
 });
 
+// Download All Animations GLB: every move of a character in one file, previewed here first
+function syncBundleButton(asset) {
+  $('downloadAll').hidden = !(asset?.kind === 'character' && asset.rigged && asset.clips?.length);
+  $('bundleCard').hidden = true;
+}
+
+$('downloadAll').addEventListener('click', async (event) => {
+  const button = event.currentTarget;
+  const asset = current;
+  const card = $('bundleCard');
+  button.disabled = true;
+  button.textContent = 'Putting every move in one file…';
+  const response = await fetch('/api/animate/bundle', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rigged: asset.rigged }) }).catch(() => null);
+  const made = response ? await response.json().catch(() => null) : null;
+  button.disabled = false;
+  button.textContent = 'Download All Animations GLB';
+  if (current !== asset) return;   // moved on while it was being made
+  if (!response?.ok) {
+    card.innerHTML = `<span class="fail">${escape(made?.error || 'It did not run. Is the studio still running?')}</span>`;
+    card.hidden = false;
+    return;
+  }
+  const summary = bundleSummary(made);
+  card.innerHTML = `<b>${escape(summary.line)}</b>
+    <span class="${summary.ok ? '' : 'fail'}">${escape(summary.detail)}</span>
+    <span class="names">${summary.names.map(escape).join(', ')}</span>
+    <a class="primary export" href="${escape(url(made.file))}" download="${escape(fileName(made.file))}">Save ${escape(fileName(made.file))}</a>`;
+  card.hidden = false;
+  // preview the file itself: each move chip plays that move from the one GLB
+  viewer.setFacing(asset.facing);
+  viewer.setClips(bundleClips(made, url(made.file)), { restUrl: url(asset.rigged) });
+});
+
 $('copyPathBtn').addEventListener('click', async (event) => {
   const button = event.currentTarget;
   try {
@@ -439,6 +473,7 @@ function show(asset) {
   }
   renderSteps(asset);
   renderHideButton();
+  syncBundleButton(asset);
   // only rigged files are turned: the skeleton is what says which way the feet point
   viewer.setFacing(asset.rigged && (asset.clips.length || displayModel(asset) === asset.rigged) ? asset.facing : null);
   if (asset.kind === 'character' && asset.clips.length) {

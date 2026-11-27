@@ -279,3 +279,23 @@ export function duration(seconds) {
   if (whole < 3600) return `${Math.floor(whole / 60)}m ${whole % 60}s`;
   return `${Math.floor(whole / 3600)}h ${Math.floor((whole % 3600) / 60)}m`;
 }
+
+/** What the all-moves GLB card says: how many moves, how big, and whether its check passed. */
+export function bundleSummary(made) {
+  const count = Number(made?.count) || 0;
+  const check = made?.check || {};
+  const problems = check.problems || [];
+  return {
+    line: `${count} ${count === 1 ? 'move' : 'moves'} · ${sizeText(made?.bytes)}`,
+    ok: problems.length === 0,
+    detail: problems.length ? problems.slice(0, 3).join(' · ')
+      : `One mesh, one skeleton (${check.joints || 0} bones), every move points at the right bones.`,
+    names: (made?.animations || []).map((a) => a.name),
+  };
+}
+
+/** The move row for the all-moves GLB: every move plays from the one file, picked by name. */
+export function bundleClips(made, fileUrl) {
+  const stamp = encodeURIComponent(String(made?.bytes ?? ''));
+  return (made?.animations || []).map((a) => ({ name: a.name, animation: a.name, file: made.file, url: `${fileUrl}?v=${stamp}` }));
+}

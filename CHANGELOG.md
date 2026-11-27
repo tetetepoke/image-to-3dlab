@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Download All Animations GLB**: one file per character. Animate made one GLB per move, each a full copy of
+  the character with one animation called `ArmatureAction`, so a game needed a file per move. The new button
+  (and the `export_all_moves` agent tool) puts the mesh, textures, materials, skeleton and skin weights in once,
+  with every move as its own animation named after it (Idle, Walk, Sprint, Jump, Kick, Cheer). It checks that
+  every move points at real bones before saving, then shows the file in the viewer: one chip per move, the number
+  of moves and the size. Three.js plays the moves with `AnimationMixer`; Blender imports each as an action. The file
+  sits in `bundle/` beside the moves and is made again only when a move is added or changed.
 - **Pixel Match: `--keep-top-paint`** leaves surfaces that face up and that no picture sees (a hat's brim, shoulders,
   the top of the hair) in the generator's own paint. The pictures' cameras stand level with the subject, so they never
   see those tops, and the local colour match shifted them like whatever the pictures see nearby: a wizard's dark violet

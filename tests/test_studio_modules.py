@@ -2089,3 +2089,17 @@ def test_a_plan_s_rig_settings_travel_to_the_server():
 def test_the_rig_card_has_a_bone_names_choice():
     source = (REPO / "viewer" / "studio" / "steps.js").read_text(encoding="utf-8")
     assert 'data-k="bonenames"' in source and '<option value="unity">Unity Humanoid</option>' in source
+
+
+@needs_node
+def test_the_all_moves_card_and_its_move_row():
+    made = {"file": "animate/r/bundle/hero_all_moves.glb", "count": 2, "bytes": 3 * 1024 * 1024,
+            "animations": [{"name": "Idle"}, {"name": "Walk"}], "check": {"joints": 17, "problems": []}}
+    out = _run("library.js", f"""
+      const made = {json.dumps(made)};
+      console.log(JSON.stringify({{ s: m.bundleSummary(made), c: m.bundleClips(made, '/output/x.glb'),
+        bad: m.bundleSummary({{ ...made, check: {{ problems: ['Walk: channel 0 has no sampler'] }} }}) }}));""")
+    assert out["s"]["line"] == "2 moves · 3 MB" and out["s"]["ok"] and "17 bones" in out["s"]["detail"]
+    assert [c["animation"] for c in out["c"]] == ["Idle", "Walk"]
+    assert {c["url"] for c in out["c"]} == {"/output/x.glb?v=3145728"}
+    assert not out["bad"]["ok"] and "no sampler" in out["bad"]["detail"]

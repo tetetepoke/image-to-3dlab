@@ -92,6 +92,7 @@ The studio does not need to be open: the first tool call starts it in the backgr
 | `model_info` | A model's numbers (triangles, vertices, textures and their sizes, bones, moves, file size) and its full path on your computer |
 | `show_in_folder` | Opens the folder holding a model in Finder or Explorer, with the file selected |
 | `export_roblox` | Makes a copy Roblox Studio imports at the right size, with its surface pictures loose, and checks it against Roblox's triangle limits |
+| `export_all_moves` | Puts a character and every move made for it into one GLB: one mesh, skeleton and textures, each move a named animation (Idle, Walk...) |
 | `make_skin` | A new skin for a finished Pixal3D model: say what to change ("make the skirt gold"), and the same model gets new paint. Its rig and moves still fit |
 | `skin_status` / `skin_picture` | Where a skin is, and its new pictures, so the agent can show you each one before anything is built |
 | `approve_skin_picture` / `redo_skin_picture` | Your verdict on a picture: approve it, or ask again with a correction. Front first, then back |
