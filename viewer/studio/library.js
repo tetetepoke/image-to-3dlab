@@ -299,3 +299,11 @@ export function bundleClips(made, fileUrl) {
   const stamp = encodeURIComponent(String(made?.bytes ?? ''));
   return (made?.animations || []).map((a) => ({ name: a.name, animation: a.name, file: made.file, url: `${fileUrl}?v=${stamp}` }));
 }
+
+/** Why the all-moves button failed, in words: the studio's own reason, or what the answer says. */
+export function bundleError(status, made) {
+  if (made?.error) return made.error;
+  if (status === 404) return 'The studio running now is an older version. Stop it (Ctrl+C in its window) and start it again.';
+  if (status) return `The studio answered with an error (${status}). Its window says why.`;
+  return 'It did not run. Is the studio still running?';
+}
