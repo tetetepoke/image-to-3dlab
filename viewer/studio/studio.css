@@ -439,3 +439,11 @@ img.glow { animation: doorglow 2.4s ease-in-out infinite; }
 .brushstage .brushcanvas { margin: 0; box-shadow: 0 0 0 1px rgb(255 255 255 / .12); }
 .brushstage-hint { margin: 0; font-weight: 600; color: var(--ember); }
 .brushcanvas { display: block; max-width: 100%; margin: 8px 0; border-radius: 8px; cursor: crosshair; }
+
+/* Download All Animations GLB */
+.side-foot .export-all { width: 100%; margin-top: 8px; }
+.bundle-card { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--line, #333); border-radius: 10px; font-size: 12px; color: var(--ash); display: grid; gap: 6px; }
+.bundle-card b { color: var(--bone); font-size: 13px; }
+.bundle-card .names { line-height: 1.5; }
+.bundle-card .fail { color: #e05050; }
+.bundle-card a { justify-self: start; }

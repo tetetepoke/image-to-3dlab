@@ -70,7 +70,7 @@ STUDIO_ONLY = {
     "api/animate/*/cancel": "via cancel_run", "api/rig/rebind/*/cancel": "via cancel_run",
 }
 # Server actions the tools below call.
-USED = {"api/chains", "api/chains/*/cancel", "api/setup/*/download", "api/reveal", "api/roblox-export", "api/bug-report", "api/usage",
+USED = {"api/chains", "api/chains/*/cancel", "api/setup/*/download", "api/reveal", "api/roblox-export", "api/animate/bundle", "api/bug-report", "api/usage",
         "api/skins", "api/skins/*/try", "api/skins/*/approve", "api/skins/*/build", "api/skins/build/*/cancel",
         "api/image/brush", "api/image/versions/use", "api/image/versions/delete",
         "api/addons/*/install", "api/addons/*/remove", "api/addons/*/run/*", "api/addons/jobs/*/cancel"}
@@ -1058,6 +1058,17 @@ def export_roblox(studio: Studio, *, asset_id: str, stage: str = "latest", kind:
                           "Too many triangles is reported here, not fixed."}
 
 
+def export_all_moves(studio: Studio, *, asset_id: str) -> dict[str, Any]:
+    """Every move of a character in one GLB (Download All Animations GLB in the studio)."""
+    asset = find_asset(studio, asset_id)
+    if not (asset.get("rigged") and asset.get("clips")):
+        raise StudioError("This asset has no moves yet. Rig it and add moves with continue_asset first.")
+    made = studio.post_json("api/animate/bundle", {"rigged": asset["rigged"]})
+    return made | {"tip": "Tell the user the file, how many moves and its size. Each move is its own named "
+                          "animation (Idle, Walk...): three.js plays them with AnimationMixer by name, Blender "
+                          "imports each as an action. check.problems is empty when every move points at real bones."}
+
+
 def report_bug(studio: Studio, *, message: str, include_prompt: bool = False) -> dict[str, Any]:
     params = {"prompt": "1"} if include_prompt else {}
     details = studio.get("api/bug-report", **params)["details"]
@@ -1518,6 +1529,13 @@ def build_server(studio: Studio | None = None):
         others default to 4 (a Roblox character is about 5-6). stage: latest | model | finished | rigged."""
         return safe(lambda: export_roblox(studio, asset_id=asset_id, stage=stage, kind=kind,
                                           height_studs=height_studs))
+
+    @server.tool(name="export_all_moves", structured_output=False)
+    def tool_export_all_moves(asset_id: str):
+        """Put a character and every move made for it into ONE GLB: one mesh, textures, skeleton and skin
+        weights, each move a named animation (Idle, Walk, Sprint...). One file per character, for Blender,
+        three.js and game engines. Made again only when a move was added since."""
+        return safe(lambda: export_all_moves(studio, asset_id=asset_id))
 
     @server.tool(name="report_bug", structured_output=False)
     def tool_report_bug(message: str, include_prompt: bool = False):

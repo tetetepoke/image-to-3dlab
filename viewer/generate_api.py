@@ -99,6 +99,7 @@ from backend_catalog import (
 from backend_catalog import (
     readiness as catalog_readiness,
 )
+from bundle_api import make_bundle as make_moves_bundle
 from download_api import (
     DOWNLOADS,
     also_fetches,
@@ -3155,6 +3156,9 @@ class Handler(SimpleHTTPRequestHandler):
         if parts == ["api", "animate", "play"]:
             self._create_animate_play()
             return
+        if parts == ["api", "animate", "bundle"]:
+            self._animate_bundle()
+            return
         if len(parts) == 4 and parts[:2] == ["api", "animate"] and parts[3] == "cancel":
             job = ANIMATE_JOBS.get(parts[2])
             if job is None:
@@ -4694,6 +4698,21 @@ class Handler(SimpleHTTPRequestHandler):
             self._send_json(422, {"error": str(exc)})
             return
         self._send_json(200, made)
+
+    def _animate_bundle(self) -> None:
+        """Download All Animations GLB: build (or reuse) one file with every move of a rigged model."""
+        body = self._read_json_body()
+        if body is None:
+            return
+        try:
+            payload = make_moves_bundle(str(body.get("rigged") or ""), OUTPUT_ROOT)
+        except ValueError as exc:
+            self._send_json(422, {"error": str(exc)})
+            return
+        except OSError as exc:
+            self._send_json(500, {"error": f"could not write the file: {exc}"})
+            return
+        self._send_json(200, payload)
 
     def _read_json_body(self, limit: int = 4096) -> dict[str, Any] | None:
         """Read a JSON POST body or send an error and return None."""
