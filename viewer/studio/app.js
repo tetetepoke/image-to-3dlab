@@ -1,7 +1,7 @@
 // AssetFurnace studio: Library | one viewer | Steps.
 // Steps run here through the server's job APIs, prop-sheet splitting included.
 
-import { STEPS, stepCount, stepDone, stepState, statusText, displayModel, stepFile, canViewStep, canFixShown, fixBlockedNote, servedUrl, visibleFamilies, madeVersion, engineOf, engineChoices, openingView, isModelFile, duration, canViewPictures, sizeText, deletionWords, linkedAssetId, statsRows, canReveal, robloxLines, bundleSummary, bundleClips } from './library.js';
+import { STEPS, stepCount, stepDone, stepState, statusText, displayModel, stepFile, canViewStep, canFixShown, fixBlockedNote, servedUrl, visibleFamilies, madeVersion, engineOf, engineChoices, openingView, isModelFile, duration, canViewPictures, sizeText, deletionWords, linkedAssetId, statsRows, canReveal, robloxLines, bundleSummary, bundleClips, bundleError } from './library.js';
 import { createStudioViewer } from './viewer.js';
 import { readyEngines, readableLog, copyDetails, logScroll, moveBox, resizeBox } from './jobs.js';
 import { stepBody, wireStep, wireBrush, wireVersions } from './steps.js';
@@ -383,7 +383,7 @@ $('downloadAll').addEventListener('click', async (event) => {
   button.textContent = 'Download All Animations GLB';
   if (current !== asset) return;   // moved on while it was being made
   if (!response?.ok) {
-    card.innerHTML = `<span class="fail">${escape(made?.error || 'It did not run. Is the studio still running?')}</span>`;
+    card.innerHTML = `<span class="fail">${escape(bundleError(response?.status, made))}</span>`;
     card.hidden = false;
     return;
   }

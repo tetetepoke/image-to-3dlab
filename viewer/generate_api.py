@@ -4712,6 +4712,9 @@ class Handler(SimpleHTTPRequestHandler):
         except OSError as exc:
             self._send_json(500, {"error": f"could not write the file: {exc}"})
             return
+        except Exception as exc:  # an odd file must give a reason on screen, not a dropped connection
+            self._send_json(500, {"error": f"could not put the moves together: {type(exc).__name__}: {exc}"})
+            return
         self._send_json(200, payload)
 
     def _read_json_body(self, limit: int = 4096) -> dict[str, Any] | None:

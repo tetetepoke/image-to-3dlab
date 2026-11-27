@@ -2103,3 +2103,12 @@ def test_the_all_moves_card_and_its_move_row():
     assert [c["animation"] for c in out["c"]] == ["Idle", "Walk"]
     assert {c["url"] for c in out["c"]} == {"/output/x.glb?v=3145728"}
     assert not out["bad"]["ok"] and "no sampler" in out["bad"]["detail"]
+
+
+@needs_node
+def test_the_all_moves_button_says_why_it_failed():
+    out = _run("library.js", """
+      console.log(JSON.stringify([m.bundleError(422, {error: 'no moves'}), m.bundleError(404, null),
+        m.bundleError(500, null), m.bundleError(undefined, null)]));""")
+    assert out[0] == "no moves"
+    assert "older version" in out[1] and "(500)" in out[2] and "still running" in out[3]
